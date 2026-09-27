@@ -1,3 +1,21 @@
+const bootScreen = document.querySelector("#boot");
+let bootJobs = 0;
+
+function finishBoot() {
+  if (!bootScreen || bootScreen.classList.contains("is-done")) return;
+  bootScreen.classList.add("is-done");
+  bootScreen.setAttribute("aria-busy", "false");
+  window.setTimeout(() => bootScreen.remove(), 400);
+}
+
+function trackBoot(work) {
+  bootJobs += 1;
+  return Promise.resolve(work).finally(() => {
+    bootJobs -= 1;
+    if (bootJobs === 0) finishBoot();
+  });
+}
+
 const menuButton = document.querySelector(".nav-toggle");
 const nav = document.querySelector("#site-nav");
 
@@ -75,7 +93,7 @@ const grids = document.querySelectorAll("[data-videos]");
 const hero = document.querySelector("[data-hero]");
 
 if (grids.length || hero) {
-  fetch("/api/feed")
+  trackBoot(fetch("/api/feed")
     .then((response) => {
       if (!response.ok) throw new Error("Feed failed");
       return response.json();
@@ -103,7 +121,7 @@ if (grids.length || hero) {
       grids.forEach((grid) => {
         grid.innerHTML = `<p class="empty">Videos could not load. <a href="https://www.youtube.com/@JellicoMediaGroup">Watch on YouTube</a>.</p>`;
       });
-    });
+    }));
 }
 
 function todayKey() {
@@ -156,20 +174,39 @@ visibleMonth.setDate(1);
 function eventsFor(filter) {
   return calendarEvents.filter((event) => {
     if (filter === "upcoming") return event.date >= todayKey();
+    if (filter === "community") return event.date >= todayKey() && event.category !== "Sports";
     if (filter.startsWith("sport:")) return event.sport === filter.slice(6) && event.date >= todayKey();
     if (eventFilter !== "all" && event.category !== eventFilter) return false;
     return true;
   });
 }
 
+function upNextMarkup(event) {
+  const bits = [formatEventDate(event.date), formatEventTime(event.time), event.category, event.location].filter(Boolean);
+  return `<article class="up-next">
+    <p class="kicker">Up next</p>
+    <h2>${escapeHtml(event.name)}</h2>
+    <p>${escapeHtml(bits.join(" · "))}</p>
+    ${event.description ? `<p>${escapeHtml(event.description)}</p>` : ""}
+  </article>`;
+}
+
 function renderPublicEvents() {
   upcomingLists.forEach((list) => {
-    const limit = Number(list.dataset.limit || 0);
     let items = eventsFor(list.dataset.events);
+    const skip = Number(list.dataset.skip || 0);
+    const limit = Number(list.dataset.limit || 0);
+    if (skip) items = items.slice(skip);
     if (limit) items = items.slice(0, limit);
-    list.innerHTML = items.length
-      ? items.map((event) => eventMarkup(event)).join("")
-      : `<p class="empty">${escapeHtml(list.dataset.empty || "Nothing is scheduled.")}</p>`;
+    if (!items.length) {
+      list.innerHTML = skip
+        ? ""
+        : `<p class="empty">${escapeHtml(list.dataset.empty || "Nothing is scheduled.")}</p>`;
+      return;
+    }
+    list.innerHTML = list.dataset.feature === "up-next"
+      ? upNextMarkup(items[0])
+      : items.map((event) => eventMarkup(event)).join("");
   });
 
   if (!monthList) return;
@@ -229,12 +266,14 @@ if (monthList || upcomingLists.length || adminEvents) {
     });
   });
 
-  loadEvents().catch(() => {
+  trackBoot(loadEvents().catch(() => {
     const message = `<p class="empty">The calendar could not load.</p>`;
     if (monthList) monthList.innerHTML = message;
     upcomingLists.forEach((list) => { list.innerHTML = message; });
-  });
+  }));
 }
+
+if (bootJobs === 0) finishBoot();
 
 const loginForm = document.querySelector("#login-form");
 if (loginForm) {
