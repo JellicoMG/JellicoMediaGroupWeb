@@ -1,0 +1,22 @@
+[
+  {
+    "id": "senior-night-2026-09-29",
+    "name": "Senior Night (Volleyball)",
+    "date": "2026-09-29",
+    "time": "",
+    "location": "Jellico High School",
+    "category": "School",
+    "sport": "volleyball",
+    "description": "Senior night for Jellico High School volleyball."
+  },
+  {
+    "id": "football-north-greene-2026-10-02",
+    "name": "Football at North Greene",
+    "date": "2026-10-02",
+    "time": "",
+    "location": "North Greene",
+    "category": "Sports",
+    "sport": "football",
+    "description": "The football team heads to North Greene."
+  }
+]

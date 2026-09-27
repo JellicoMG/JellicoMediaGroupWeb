@@ -1,8 +1,12 @@
-# Render Blueprint: https://render.com/docs/blueprint-spec
-# Static HTML/CSS site. No build step; the repo root is what gets published.
+# Jellico Media Group. Node serves the site and refreshes the YouTube feed.
 services:
   - type: web
     name: jellico-media-group
-    runtime: static
-    buildCommand: echo "Static site — no build step"
-    staticPublishPath: .
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: JMG_ADMIN_PASSWORD
+        sync: false
