@@ -1,0 +1,8 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Static HTML/CSS site. No build step; the repo root is what gets published.
+services:
+  - type: web
+    name: jellico-media-group
+    runtime: static
+    buildCommand: echo "Static site — no build step"
+    staticPublishPath: .
