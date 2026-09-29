@@ -473,6 +473,23 @@ p { margin: 0; }
 
 .event-actions { display: flex; gap: 8px; }
 
+.csv-drop {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 22px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: #10131b;
+  text-align: center;
+}
+
+.csv-drop.is-over { border-color: var(--blue); background: #12182a; }
+.csv-drop strong { font-size: 1.15rem; }
+.csv-choose { cursor: pointer; }
+.csv-choose input { display: none; }
+
 .calendar-layout {
   display: grid;
   grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);

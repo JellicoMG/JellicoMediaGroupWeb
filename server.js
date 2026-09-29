@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { addEvent, listEvents, removeEvent, updateEvent } from "./lib/events.js";
+import { addEvent, importEvents, listEvents, removeEvent, updateEvent } from "./lib/events.js";
 import { getFeed } from "./lib/feeds.js";
 import { notFound, resolve as resolvePage } from "./lib/pages.js";
 
@@ -58,7 +58,7 @@ function readBody(req) {
     let size = 0;
     req.on("data", (chunk) => {
       size += chunk.length;
-      if (size > 20_000) {
+      if (size > 200_000) {
         reject(new Error("That event is too large."));
         req.destroy();
         return;
@@ -163,6 +163,27 @@ const server = createServer(async (req, res) => {
 
     if (url.pathname === "/api/events" && req.method === "GET") {
       await sendEvents(res);
+      return;
+    }
+
+    if (url.pathname === "/api/events/import" && req.method === "POST") {
+      if (!requireAdmin(req, res)) return;
+      const input = JSON.parse(await readBody(req) || "{}");
+      try {
+        const result = await importEvents(input.csv);
+        send(res, 200, JSON.stringify({
+          events: result.events,
+          added: result.added,
+          updated: result.updated,
+        }), {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-cache",
+        });
+      } catch (error) {
+        send(res, 400, JSON.stringify({ error: error.message || "Could not read that CSV." }), {
+          "Content-Type": "application/json; charset=utf-8",
+        });
+      }
       return;
     }
 

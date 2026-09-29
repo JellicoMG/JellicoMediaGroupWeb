@@ -1,7 +1,7 @@
 [
   {
     "id": "senior-night-2026-09-29",
-    "name": "Senior Night (Volleyball)",
+    "name": "Senior Night — Volleyball",
     "date": "2026-09-29",
     "time": "",
     "location": "Jellico High School",
@@ -13,10 +13,90 @@
     "id": "football-north-greene-2026-10-02",
     "name": "Football at North Greene",
     "date": "2026-10-02",
-    "time": "",
+    "time": "7:00 PM",
     "location": "North Greene",
     "category": "Sports",
     "sport": "football",
     "description": "The football team heads to North Greene."
+  },
+  {
+    "id": "585bb872-38f5-4f7f-99c8-947e8aa26fc6",
+    "name": "Jellico's Old Fashioned Fall Festival",
+    "date": "2026-10-02",
+    "time": "10:00 AM",
+    "location": "Veterans Park",
+    "category": "Community",
+    "sport": "",
+    "description": ""
+  },
+  {
+    "id": "5021dae2-7c00-4c76-8c2e-79176298f996",
+    "name": "Quilt Show",
+    "date": "2026-10-02",
+    "time": "2:00 PM",
+    "location": "Jellico Public Library",
+    "category": "Community",
+    "sport": "",
+    "description": ""
+  },
+  {
+    "id": "3e47fdc2-675d-4c8b-845c-7eb5c43b9565",
+    "name": "Jellico's Old Fashioned Fall Festival",
+    "date": "2026-10-03",
+    "time": "10:00 AM",
+    "location": "Veterans Park",
+    "category": "Community",
+    "sport": "",
+    "description": ""
+  },
+  {
+    "id": "10056cd9-ee3b-4a78-9aba-3f8a2622b84c",
+    "name": "Football vs. Unaka",
+    "date": "2026-10-09",
+    "time": "7:00 PM",
+    "location": "Jellico High School",
+    "category": "Sports",
+    "sport": "football",
+    "description": ""
+  },
+  {
+    "id": "5c7a9669-eb03-4b4c-b3ea-d35fc7400132",
+    "name": "Mission of Hope Food Outreach",
+    "date": "2026-10-10",
+    "time": "10:00 AM",
+    "location": "Jellico High School",
+    "category": "Community",
+    "sport": "",
+    "description": ""
+  },
+  {
+    "id": "88abf848-a396-4a55-8876-ab0d03537c85",
+    "name": "Football vs. Hancock Co.",
+    "date": "2026-10-23",
+    "time": "7:00 PM",
+    "location": "Jellico High School",
+    "category": "Sports",
+    "sport": "football",
+    "description": ""
+  },
+  {
+    "id": "1db86a36-fdf1-4c77-b43c-a3374c6879d1",
+    "name": "Football at Cosby",
+    "date": "2026-10-29",
+    "time": "7:00 PM",
+    "location": "Cosby High School",
+    "category": "Sports",
+    "sport": "football",
+    "description": ""
+  },
+  {
+    "id": "bef90b52-0bd0-404a-8889-c5cbdcbc934d",
+    "name": "Trunk or Treat",
+    "date": "2026-10-31",
+    "time": "4:00–6:00 PM",
+    "location": "Veterans Park",
+    "category": "Community",
+    "sport": "",
+    "description": ""
   }
 ]

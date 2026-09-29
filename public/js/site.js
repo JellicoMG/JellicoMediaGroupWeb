@@ -142,6 +142,7 @@ function formatEventDate(iso) {
 
 function formatEventTime(time) {
   if (!time) return "";
+  if (!/^\d{2}:\d{2}$/.test(time)) return time;
   const [hour, minute] = time.split(":").map(Number);
   const date = new Date();
   date.setHours(hour, minute, 0, 0);
@@ -296,6 +297,59 @@ if (loginForm) {
     loginForm.reset();
     showAdmin(true);
     loadEvents().catch(() => {});
+  });
+}
+
+const csvDrop = document.querySelector("#csv-drop");
+const csvFile = document.querySelector("#csv-file");
+const csvStatus = document.querySelector("#csv-status");
+
+async function importCsvFile(file) {
+  if (!file || !csvStatus) return;
+  csvStatus.textContent = "Reading the CSV…";
+  const response = await fetch("/api/events/import", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ csv: await file.text() }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    csvStatus.textContent = data.error || "Could not read that CSV.";
+    return;
+  }
+  calendarEvents = data.events || [];
+  const added = Number(data.added || 0);
+  const updated = Number(data.updated || 0);
+  csvStatus.textContent = `Added ${added} and updated ${updated}.`;
+  renderPublicEvents();
+  renderAdminEvents();
+}
+
+if (csvDrop && csvFile) {
+  ["dragenter", "dragover"].forEach((type) => {
+    csvDrop.addEventListener(type, (event) => {
+      event.preventDefault();
+      csvDrop.classList.add("is-over");
+    });
+  });
+  ["dragleave", "drop"].forEach((type) => {
+    csvDrop.addEventListener(type, (event) => {
+      event.preventDefault();
+      csvDrop.classList.remove("is-over");
+    });
+  });
+  csvDrop.addEventListener("drop", (event) => {
+    const file = event.dataTransfer?.files?.[0];
+    importCsvFile(file).catch(() => {
+      if (csvStatus) csvStatus.textContent = "Could not read that CSV.";
+    });
+  });
+  csvFile.addEventListener("change", () => {
+    const file = csvFile.files?.[0];
+    importCsvFile(file).catch(() => {
+      if (csvStatus) csvStatus.textContent = "Could not read that CSV.";
+    });
+    csvFile.value = "";
   });
 }
 
