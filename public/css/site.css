@@ -342,7 +342,7 @@ p { margin: 0; }
 .sport-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .points { grid-template-columns: 1.2fr 0.8fr; }
 
-.social-card, .panel, .sport-card, .points article, .sponsor-band {
+.social-card, .panel, .sport-card, .points article, .contributor-band, .contributor-card {
   background: var(--raise);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -393,7 +393,7 @@ p { margin: 0; }
 
 .show-card h3 a { text-decoration: none; }
 
-.sponsor-band {
+.contributor-band {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -401,7 +401,91 @@ p { margin: 0; }
   padding: 28px;
 }
 
-.sponsor-band p { color: var(--muted); margin-top: 8px; }
+.contributor-band p { color: var(--muted); margin-top: 8px; }
+
+.contributor-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+}
+
+.contributor-names a,
+.contributor-names span {
+  color: white;
+  font-family: var(--display);
+  font-size: 1.45rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.contributor-names a:hover { color: #b9c7ff; }
+
+.contributor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.contributor-card h2 { font-size: 1.8rem; }
+.contributor-card p { color: var(--muted); margin: 8px 0; }
+
+.admin-block { margin-top: 42px; }
+.admin-block > h2 { font-size: 2.4rem; margin-bottom: 8px; }
+.admin-section { margin: 28px 0 14px; font-size: 2.4rem; }
+.alert-form { margin-bottom: 8px; }
+
+.event-form .check-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+.event-form .check-line input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.home-alert {
+  width: min(520px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.home-alert::backdrop {
+  background: rgba(7, 8, 12, 0.78);
+}
+
+.home-alert-card {
+  position: relative;
+  padding: 28px 24px 22px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(420px 160px at 100% 0%, rgba(60, 99, 255, 0.32), transparent 60%),
+    var(--raise);
+}
+
+.home-alert-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.home-alert h2 {
+  margin: 0 72px 10px 0;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+}
+
+.home-alert p {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -532,10 +616,22 @@ p { margin: 0; }
 .email-link {
   display: inline-block;
   margin: 18px 0 8px;
+  padding: 0;
+  border: 0;
+  background: none;
   font-family: var(--display);
   font-size: clamp(1.8rem, 4vw, 3rem);
   color: white;
-  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.email-link:hover { color: #b9c7ff; }
+
+.copy-note {
+  min-height: 1.2em;
+  margin: 0 0 16px;
+  color: #b9c7ff;
 }
 
 .site-footer {
@@ -567,6 +663,22 @@ p { margin: 0; }
 }
 
 .site-footer a:hover { color: white; }
+
+.footer-email {
+  display: block;
+  margin: 4px 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.footer-email:hover { color: white; }
+.footer-email.is-copied::after { content: " · Copied"; color: #b9c7ff; }
+.footer-email.is-copied::after { content: " — Copied"; color: #b9c7ff; }
 
 .footer-base {
   margin-top: 22px;
@@ -606,7 +718,8 @@ p { margin: 0; }
   .sport-grid,
   .points,
   .footer-grid,
-  .sponsor-band,
+  .contributor-band,
+  .contributor-grid,
   .calendar-layout,
   .event-row,
   .event-form {

@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { addContributor, importContributors, listContributors, removeContributor, updateContributor } from "./lib/contributors.js";
+import { getNotice, saveNotice } from "./lib/notice.js";
 import { addEvent, importEvents, listEvents, removeEvent, updateEvent } from "./lib/events.js";
 import { getFeed } from "./lib/feeds.js";
 import { notFound, resolve as resolvePage } from "./lib/pages.js";
@@ -115,10 +117,17 @@ async function sendEvents(res) {
 
 function requireAdmin(req, res) {
   if (isAdmin(req)) return true;
-  send(res, 401, JSON.stringify({ error: "Sign in to change the calendar." }), {
+  send(res, 401, JSON.stringify({ error: "Sign in to make changes." }), {
     "Content-Type": "application/json; charset=utf-8",
   });
   return false;
+}
+
+function sendContributors(res) {
+  send(res, 200, JSON.stringify({ contributors: listContributors() }), {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-cache",
+  });
 }
 
 const server = createServer(async (req, res) => {
@@ -204,6 +213,74 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname === "/api/notice" && req.method === "GET") {
+      send(res, 200, JSON.stringify({ notice: getNotice() }), {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-cache",
+      });
+      return;
+    }
+
+    if (url.pathname === "/api/notice" && req.method === "POST") {
+      if (!requireAdmin(req, res)) return;
+      const input = JSON.parse(await readBody(req) || "{}");
+      try {
+        const notice = await saveNotice(input);
+        send(res, 200, JSON.stringify({ notice }), {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-cache",
+        });
+      } catch (error) {
+        send(res, 400, JSON.stringify({ error: error.message || "Could not save the alert." }), {
+          "Content-Type": "application/json; charset=utf-8",
+        });
+      }
+      return;
+    }
+
+    if (url.pathname === "/api/contributors" && req.method === "GET") {
+      sendContributors(res);
+      return;
+    }
+
+    if (url.pathname === "/api/contributors/import" && req.method === "POST") {
+      if (!requireAdmin(req, res)) return;
+      const input = JSON.parse(await readBody(req) || "{}");
+      try {
+        const result = await importContributors(input.csv);
+        send(res, 200, JSON.stringify({
+          contributors: result.contributors,
+          added: result.added,
+          updated: result.updated,
+        }), {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-cache",
+        });
+      } catch (error) {
+        send(res, 400, JSON.stringify({ error: error.message || "Could not read that CSV." }), {
+          "Content-Type": "application/json; charset=utf-8",
+        });
+      }
+      return;
+    }
+
+    if ((url.pathname === "/api/contributors" || url.pathname === "/api/contributors/update" || url.pathname === "/api/contributors/delete") && req.method === "POST") {
+      if (!requireAdmin(req, res)) return;
+      const input = JSON.parse(await readBody(req) || "{}");
+      try {
+        if (url.pathname === "/api/contributors") await addContributor(input);
+        else if (url.pathname === "/api/contributors/update") await updateContributor(input.id, input);
+        else await removeContributor(input.id);
+      } catch (error) {
+        send(res, 400, JSON.stringify({ error: error.message || "Could not update advertisers." }), {
+          "Content-Type": "application/json; charset=utf-8",
+        });
+        return;
+      }
+      sendContributors(res);
+      return;
+    }
+
     if (url.pathname === "/api/feed") {
       const feed = await getFeed();
       send(res, 200, JSON.stringify(feed), {
@@ -229,6 +306,10 @@ const server = createServer(async (req, res) => {
     }
 
     const pathname = normalize(url.pathname).replace(/\\/g, "/").replace(/\/$/, "") || "/";
+    if (pathname === "/sponsors" || pathname === "/contributors") {
+      send(res, 301, "", { Location: "/advertisers" });
+      return;
+    }
     const html = resolvePage(pathname) || notFound();
     send(res, resolvePage(pathname) ? 200 : 404, html, {
       "Content-Type": "text/html; charset=utf-8",

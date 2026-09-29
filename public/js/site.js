@@ -1,11 +1,22 @@
 const bootScreen = document.querySelector("#boot");
 let bootJobs = 0;
+let siteReady = false;
+const readyJobs = [];
 
 function finishBoot() {
-  if (!bootScreen || bootScreen.classList.contains("is-done")) return;
-  bootScreen.classList.add("is-done");
-  bootScreen.setAttribute("aria-busy", "false");
-  window.setTimeout(() => bootScreen.remove(), 400);
+  if (bootScreen && !bootScreen.classList.contains("is-done")) {
+    bootScreen.classList.add("is-done");
+    bootScreen.setAttribute("aria-busy", "false");
+    window.setTimeout(() => bootScreen.remove(), 400);
+  }
+  if (siteReady) return;
+  siteReady = true;
+  readyJobs.splice(0).forEach((job) => job());
+}
+
+function whenSiteReady(job) {
+  if (siteReady) job();
+  else readyJobs.push(job);
 }
 
 function trackBoot(work) {
@@ -15,6 +26,29 @@ function trackBoot(work) {
     if (bootJobs === 0) finishBoot();
   });
 }
+
+document.querySelectorAll("[data-copy-email]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const email = button.dataset.copyEmail;
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      const field = document.createElement("textarea");
+      field.value = email;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.left = "-9999px";
+      document.body.appendChild(field);
+      field.select();
+      document.execCommand("copy");
+      field.remove();
+    }
+    const note = button.parentElement?.querySelector("[data-copy-status]");
+    if (note) note.textContent = "Copied";
+    button.classList.add("is-copied");
+    window.setTimeout(() => button.classList.remove("is-copied"), 2000);
+  });
+});
 
 const menuButton = document.querySelector(".nav-toggle");
 const nav = document.querySelector("#site-nav");
@@ -175,7 +209,9 @@ visibleMonth.setDate(1);
 function eventsFor(filter) {
   return calendarEvents.filter((event) => {
     if (filter === "upcoming") return event.date >= todayKey();
-    if (filter === "community") return event.date >= todayKey() && event.category !== "Sports";
+    if (filter === "community") {
+      return event.date >= todayKey() && (event.category === "School" || event.category === "Community");
+    }
     if (filter.startsWith("sport:")) return event.sport === filter.slice(6) && event.date >= todayKey();
     if (eventFilter !== "all" && event.category !== eventFilter) return false;
     return true;
@@ -238,6 +274,12 @@ function showAdmin(isAdmin) {
   if (!adminLogin || !adminConsole) return;
   adminLogin.hidden = isAdmin;
   adminConsole.hidden = !isAdmin;
+  if (isAdmin && document.querySelector("#contributor-form")) {
+    loadAdvertisers().catch(() => {});
+  }
+  if (isAdmin && document.querySelector("#notice-form")) {
+    loadNotice().catch(() => {});
+  }
 }
 
 async function loadEvents() {
@@ -448,3 +490,294 @@ if (eventForm) {
     }
   });
 }
+
+const contributorForm = document.querySelector("#contributor-form");
+const contributorList = document.querySelector("#admin-contributors");
+let advertisers = [];
+
+function advertiserMarkup(item) {
+  const bits = [item.line, item.url].filter(Boolean);
+  return `<article class="event-row">
+    <p class="event-when">Ad</p>
+    <div>
+      <h3>${escapeHtml(item.name)}</h3>
+      ${bits.length ? `<p>${escapeHtml(bits.join(" · "))}</p>` : ""}
+    </div>
+    <div class="event-actions">
+      <button class="chip" type="button" data-edit-advertiser="${escapeHtml(item.id)}">Edit</button>
+      <button class="chip" type="button" data-remove-advertiser="${escapeHtml(item.id)}">Remove</button>
+    </div>
+  </article>`;
+}
+
+function renderAdvertisers() {
+  if (!contributorList) return;
+  contributorList.innerHTML = advertisers.length
+    ? advertisers.map(advertiserMarkup).join("")
+    : `<p class="empty">${escapeHtml(contributorList.dataset.empty || "No advertisers yet.")}</p>`;
+}
+
+async function loadAdvertisers() {
+  const response = await fetch("/api/contributors");
+  if (!response.ok) throw new Error("Advertisers failed");
+  const data = await response.json();
+  advertisers = Array.isArray(data.contributors) ? data.contributors : [];
+  renderAdvertisers();
+}
+
+if (contributorForm && contributorList) {
+  const status = document.querySelector("#contributor-status");
+  const title = document.querySelector("#contributor-form-title");
+  const submit = document.querySelector("#contributor-submit");
+  const cancel = document.querySelector("#contributor-cancel");
+
+  function resetAdvertiserForm() {
+    contributorForm.reset();
+    contributorForm.elements.id.value = "";
+    if (title) title.textContent = "Add an advertiser";
+    if (submit) submit.textContent = "Add advertiser";
+    if (cancel) cancel.hidden = true;
+  }
+
+  cancel?.addEventListener("click", resetAdvertiserForm);
+
+  contributorForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = new FormData(contributorForm);
+    const id = String(form.get("id") || "");
+    const response = await fetch(id ? "/api/contributors/update" : "/api/contributors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        name: form.get("name"),
+        url: form.get("url"),
+        line: form.get("line"),
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if (status) status.textContent = data.error || "Could not save that advertiser.";
+      return;
+    }
+    advertisers = data.contributors || [];
+    if (status) status.textContent = id ? "Advertiser updated." : "Advertiser added.";
+    resetAdvertiserForm();
+    renderAdvertisers();
+  });
+
+  contributorList.addEventListener("click", async (event) => {
+    const edit = event.target.closest("[data-edit-advertiser]");
+    const remove = event.target.closest("[data-remove-advertiser]");
+    if (edit) {
+      const item = advertisers.find((entry) => entry.id === edit.dataset.editAdvertiser);
+      if (!item) return;
+      contributorForm.elements.id.value = item.id;
+      contributorForm.elements.name.value = item.name;
+      contributorForm.elements.url.value = item.url || "";
+      contributorForm.elements.line.value = item.line || "";
+      if (title) title.textContent = "Edit advertiser";
+      if (submit) submit.textContent = "Save changes";
+      if (cancel) cancel.hidden = false;
+      if (status) status.textContent = "";
+      contributorForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (remove) {
+      const item = advertisers.find((entry) => entry.id === remove.dataset.removeAdvertiser);
+      if (!item || !window.confirm(`Remove ${item.name}?`)) return;
+      const response = await fetch("/api/contributors/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (status) status.textContent = data.error || "Could not remove that advertiser.";
+        return;
+      }
+      advertisers = data.contributors || [];
+      if (contributorForm.elements.id.value === item.id) resetAdvertiserForm();
+      renderAdvertisers();
+    }
+  });
+
+  const contributorDrop = document.querySelector("#contributor-drop");
+  const contributorFile = document.querySelector("#contributor-file");
+  const contributorCsvStatus = document.querySelector("#contributor-csv-status");
+
+  async function importAdvertiserFile(file) {
+    if (!file || !contributorCsvStatus) return;
+    contributorCsvStatus.textContent = "Reading the CSV…";
+    const response = await fetch("/api/contributors/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ csv: await file.text() }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      contributorCsvStatus.textContent = data.error || "Could not read that CSV.";
+      return;
+    }
+    advertisers = data.contributors || [];
+    const added = Number(data.added || 0);
+    const updated = Number(data.updated || 0);
+    contributorCsvStatus.textContent = `Added ${added} and updated ${updated}.`;
+    renderAdvertisers();
+  }
+
+  if (contributorDrop && contributorFile) {
+    ["dragenter", "dragover"].forEach((type) => {
+      contributorDrop.addEventListener(type, (event) => {
+        event.preventDefault();
+        contributorDrop.classList.add("is-over");
+      });
+    });
+    ["dragleave", "drop"].forEach((type) => {
+      contributorDrop.addEventListener(type, (event) => {
+        event.preventDefault();
+        contributorDrop.classList.remove("is-over");
+      });
+    });
+    contributorDrop.addEventListener("drop", (event) => {
+      const file = event.dataTransfer?.files?.[0];
+      importAdvertiserFile(file).catch(() => {
+        if (contributorCsvStatus) contributorCsvStatus.textContent = "Could not read that CSV.";
+      });
+    });
+    contributorFile.addEventListener("change", () => {
+      const file = contributorFile.files?.[0];
+      importAdvertiserFile(file).catch(() => {
+        if (contributorCsvStatus) contributorCsvStatus.textContent = "Could not read that CSV.";
+      });
+      contributorFile.value = "";
+    });
+  }
+}
+
+function rememberedAlert() {
+  try {
+    return localStorage.getItem("jmg-home-alert") || "";
+  } catch {
+    return "";
+  }
+}
+
+function rememberAlert(key) {
+  try {
+    localStorage.setItem("jmg-home-alert", key);
+  } catch {
+    // The alert can still close for this visit.
+  }
+}
+
+const homeAlert = document.querySelector("#home-alert");
+if (homeAlert) {
+  const alertTitle = document.querySelector("#home-alert-title");
+  const alertMessage = document.querySelector("#home-alert-message");
+  const alertLink = document.querySelector("#home-alert-link");
+  const alertClose = document.querySelector("#home-alert-close");
+  let alertKey = "";
+
+  function dismissAlert() {
+    if (alertKey) rememberAlert(alertKey);
+    if (homeAlert.open) homeAlert.close();
+  }
+
+  alertClose?.addEventListener("click", dismissAlert);
+  alertLink?.addEventListener("click", () => {
+    if (alertKey) rememberAlert(alertKey);
+  });
+  homeAlert.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    dismissAlert();
+  });
+  homeAlert.addEventListener("click", (event) => {
+    if (event.target === homeAlert) dismissAlert();
+  });
+
+  function openHomeAlert(notice) {
+    if (!notice?.active || (!notice.title && !notice.message)) return;
+    if (!notice.updated || rememberedAlert() === notice.updated) return;
+    alertKey = notice.updated;
+    if (alertTitle) {
+      alertTitle.hidden = !notice.title;
+      alertTitle.textContent = notice.title || "";
+    }
+    if (alertMessage) {
+      alertMessage.hidden = !notice.message;
+      alertMessage.textContent = notice.message || "";
+    }
+    if (alertLink) {
+      const hasLink = Boolean(notice.linkUrl && notice.linkLabel);
+      alertLink.hidden = !hasLink;
+      if (hasLink) {
+        alertLink.href = notice.linkUrl;
+        alertLink.textContent = notice.linkLabel;
+        if (/^https?:/i.test(notice.linkUrl)) {
+          alertLink.target = "_blank";
+          alertLink.rel = "noopener noreferrer";
+        } else {
+          alertLink.removeAttribute("target");
+          alertLink.removeAttribute("rel");
+        }
+      }
+    }
+    homeAlert.showModal();
+  }
+
+  trackBoot(fetch("/api/notice")
+    .then((response) => (response.ok ? response.json() : null))
+    .then((data) => {
+      const notice = data?.notice;
+      if (!notice) return;
+      whenSiteReady(() => {
+        window.setTimeout(() => openHomeAlert(notice), 420);
+      });
+    })
+    .catch(() => {}));
+}
+
+async function loadNotice() {
+  const form = document.querySelector("#notice-form");
+  if (!form) return;
+  const response = await fetch("/api/notice");
+  if (!response.ok) return;
+  const data = await response.json();
+  const notice = data.notice || {};
+  form.elements.active.checked = Boolean(notice.active);
+  form.elements.title.value = notice.title || "";
+  form.elements.message.value = notice.message || "";
+  form.elements.linkLabel.value = notice.linkLabel || "";
+  form.elements.linkUrl.value = notice.linkUrl || "";
+}
+
+const noticeForm = document.querySelector("#notice-form");
+if (noticeForm) {
+  noticeForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const status = document.querySelector("#notice-status");
+    const form = new FormData(noticeForm);
+    const response = await fetch("/api/notice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        active: form.get("active") === "on",
+        title: form.get("title"),
+        message: form.get("message"),
+        linkLabel: form.get("linkLabel"),
+        linkUrl: form.get("linkUrl"),
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if (status) status.textContent = data.error || "Could not save the alert.";
+      return;
+    }
+    if (status) {
+      status.textContent = data.notice?.active
+        ? "The alert is on the home page."
+        : "The alert is hidden.";
+    }
+  });
+}
+
