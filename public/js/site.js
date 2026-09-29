@@ -78,8 +78,9 @@ function escapeHtml(value) {
 }
 
 function formatDate(iso) {
+  if (!iso) return "";
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
+  if (Number.isNaN(date.getTime())) return String(iso);
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 

@@ -283,9 +283,10 @@ const server = createServer(async (req, res) => {
 
     if (url.pathname === "/api/feed") {
       const feed = await getFeed();
+      const failed = Boolean(feed.error) || !Array.isArray(feed.videos) || feed.videos.length === 0;
       send(res, 200, JSON.stringify(feed), {
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": failed ? "no-store" : "public, max-age=300",
       });
       return;
     }
