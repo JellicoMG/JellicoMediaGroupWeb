@@ -1,26 +1,26 @@
 [
   {
-    "id": "senior-night-2026-09-29",
+    "id": "0299a547-7bb9-4860-b43d-b5c229b60f9d",
     "name": "Senior Night — Volleyball",
     "date": "2026-09-29",
     "time": "",
     "location": "Jellico High School",
     "category": "School",
     "sport": "volleyball",
-    "description": "Senior night for Jellico High School volleyball."
+    "description": ""
   },
   {
-    "id": "football-north-greene-2026-10-02",
+    "id": "2d55743a-4393-4970-8cee-382f006167da",
     "name": "Football at North Greene",
     "date": "2026-10-02",
     "time": "7:00 PM",
     "location": "North Greene",
     "category": "Sports",
     "sport": "football",
-    "description": "The football team heads to North Greene."
+    "description": ""
   },
   {
-    "id": "585bb872-38f5-4f7f-99c8-947e8aa26fc6",
+    "id": "ca0dcd7d-8e1f-48f3-8a2b-1d22a942c9b1",
     "name": "Jellico's Old Fashioned Fall Festival",
     "date": "2026-10-02",
     "time": "10:00 AM",
@@ -30,7 +30,7 @@
     "description": ""
   },
   {
-    "id": "5021dae2-7c00-4c76-8c2e-79176298f996",
+    "id": "c2fda688-73b5-40ad-806f-42ad44f7aa91",
     "name": "Quilt Show",
     "date": "2026-10-02",
     "time": "2:00 PM",
@@ -40,7 +40,7 @@
     "description": ""
   },
   {
-    "id": "3e47fdc2-675d-4c8b-845c-7eb5c43b9565",
+    "id": "8ea47550-44b6-4dd5-a1c6-3407bdaad4ce",
     "name": "Jellico's Old Fashioned Fall Festival",
     "date": "2026-10-03",
     "time": "10:00 AM",
@@ -50,7 +50,7 @@
     "description": ""
   },
   {
-    "id": "10056cd9-ee3b-4a78-9aba-3f8a2622b84c",
+    "id": "b2270fef-4099-4a97-8068-b32763593e34",
     "name": "Football vs. Unaka",
     "date": "2026-10-09",
     "time": "7:00 PM",
@@ -60,7 +60,7 @@
     "description": ""
   },
   {
-    "id": "5c7a9669-eb03-4b4c-b3ea-d35fc7400132",
+    "id": "575f28a3-4c7e-43ea-b6ba-87b3b0c441a2",
     "name": "Mission of Hope Food Outreach",
     "date": "2026-10-10",
     "time": "10:00 AM",
@@ -70,7 +70,7 @@
     "description": ""
   },
   {
-    "id": "88abf848-a396-4a55-8876-ab0d03537c85",
+    "id": "63ac14f7-65df-4e1a-b850-b2e7d78483dd",
     "name": "Football vs. Hancock Co.",
     "date": "2026-10-23",
     "time": "7:00 PM",
@@ -80,7 +80,7 @@
     "description": ""
   },
   {
-    "id": "1db86a36-fdf1-4c77-b43c-a3374c6879d1",
+    "id": "cbd21a95-179e-4b65-aaee-80feb51c7eef",
     "name": "Football at Cosby",
     "date": "2026-10-29",
     "time": "7:00 PM",
@@ -90,7 +90,7 @@
     "description": ""
   },
   {
-    "id": "bef90b52-0bd0-404a-8889-c5cbdcbc934d",
+    "id": "7067804e-c2a9-4763-a36e-97fa47014298",
     "name": "Trunk or Treat",
     "date": "2026-10-31",
     "time": "4:00–6:00 PM",

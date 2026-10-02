@@ -1,1 +1,56 @@
-[]
+[
+  {
+    "id": "cb032ad6-d8d3-4b10-b4ad-49c9de1d94f2",
+    "name": "Collectibles & More LaFollette",
+    "url": "",
+    "line": "(423) 201-9809"
+  },
+  {
+    "id": "791dfa2e-4821-476e-834d-4353e6c634f1",
+    "name": "Matthew Chambers - Farm Bureau",
+    "url": "https://www.fbitn.com/tn/campbell-county/jellico/campbell-jellico-agency/matthew-chambers",
+    "line": "(423) 784-1772"
+  },
+  {
+    "id": "2d87199c-c8cc-44ce-9f00-aa91868a168f",
+    "name": "Pizza Spot",
+    "url": "https://www.facebook.com/pizza.spot.jellico",
+    "line": "(423) 784-2007"
+  },
+  {
+    "id": "fc1d731c-795c-4973-b783-ed59d971d5de",
+    "name": "Restoration Shoreline Norris Lake Rip Rap",
+    "url": "https://restorationshorelinellc.com/",
+    "line": "(423) 397-2550"
+  },
+  {
+    "id": "48603a55-5867-4c62-8330-7e0e84d9770a",
+    "name": "Ryne Cummins",
+    "url": "",
+    "line": "(423) 784-5820"
+  },
+  {
+    "id": "a0889b09-46d3-4304-a6a4-d17e83e28f27",
+    "name": "Indian Mountain Hospital for Animals",
+    "url": "",
+    "line": "(423) 784-7475"
+  },
+  {
+    "id": "3251fb29-a88c-4bab-8638-7b827250b0c0",
+    "name": "Solid Grounds",
+    "url": "",
+    "line": "(423) 372-2072"
+  },
+  {
+    "id": "ff66b6af-10e1-47f5-88e6-46872d23db75",
+    "name": "McCloud Mountain",
+    "url": "https://www.mtcloud.com/",
+    "line": "(423) 562-3282"
+  },
+  {
+    "id": "507438b3-e85d-4ce6-a11a-648ffa55df28",
+    "name": "Fields Real Estate",
+    "url": "",
+    "line": "(423) 562-9633"
+  }
+]
